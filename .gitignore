@@ -1,0 +1,5 @@
+*local.py
+/venv/*
+*.pyc
+.DS_Store
+cronscript.log
