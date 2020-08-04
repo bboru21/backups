@@ -24,17 +24,17 @@ def progress(filename, size, sent):
 def archive_current_backup():
     print("archiving current backup")
     # create archive folders
-    dir = os.path.join(*OS_BACKUPS_PATH, "archive")
+    dir = os.path.join(*OS_BACKUPS_PATH, "archive-diskstation")
     if not os.path.exists(dir):
         os.mkdir(dir)
 
     # move old backup folders into archive
     dirs = next( os.walk(settings.BACKUPS_DIRECTORY))[1]
     for d in dirs:
-        if re.match('Backup', d, flags=re.IGNORECASE):
+        if re.match('Backup_Diskstation', d, flags=re.IGNORECASE):
             shutil.move(
                 "{}/{}".format(settings.BACKUPS_DIRECTORY, d),
-                "{}/archive/{}".format(settings.BACKUPS_DIRECTORY, d),
+                "{}/archive-diskstation/{}".format(settings.BACKUPS_DIRECTORY, d),
             )
     print("done")
 
@@ -43,17 +43,17 @@ def archive_current_dropbox_backup():
     print("archiving current dropbox backup")
 
     # create archive folders
-    dir = os.path.join(*OS_DROPBOX_BACKUPS_PATH, "archive")
+    dir = os.path.join(*OS_DROPBOX_BACKUPS_PATH, "archive-diskstation")
     if not os.path.exists(dir):
         os.mkdir(dir)
 
     # move old backup folders into Dropbox archive
     dirs = next( os.walk(settings.DROPBOX_BACKUPS_DIRECTORY))[1]
     for d in dirs:
-        if re.match('Backup', d, flags=re.IGNORECASE):
+        if re.match('Backup_Diskstation', d, flags=re.IGNORECASE):
             shutil.move(
                 "{}/{}".format(settings.DROPBOX_BACKUPS_DIRECTORY, d),
-                "{}/archive/{}".format(settings.DROPBOX_BACKUPS_DIRECTORY, d),
+                "{}/archive-diskstation/{}".format(settings.DROPBOX_BACKUPS_DIRECTORY, d),
             )
 
     print("done")
@@ -130,12 +130,12 @@ def copy_backup_to_dropbox(destination):
 
 def delete_local_archive():
     print("removing local archive...")
-    shutil.rmtree("{}/archive".format(settings.BACKUPS_DIRECTORY))
+    shutil.rmtree("{}/archive-diskstation".format(settings.BACKUPS_DIRECTORY))
     print("done")
 
 def delete_dropbox_archive():
     print("removing dropbox archive...")
-    shutil.rmtree("{}/archive".format(settings.DROPBOX_BACKUPS_DIRECTORY))
+    shutil.rmtree("{}/archive-diskstation".format(settings.DROPBOX_BACKUPS_DIRECTORY))
     print("done")
 
 def run():
