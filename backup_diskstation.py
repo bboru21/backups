@@ -140,14 +140,24 @@ def delete_dropbox_archive():
 
 def run():
 
-    print("initializing {} backup to local...".format(settings.DISKSTATION_HOST))
+    start_date = datetime.now().strftime("%m/%d/%Y %H:%M:%S")
+    print("initializing {} backup to local ({})".format(
+        settings.DISKSTATION_HOST,
+        start_date,
+    ))
     try:
         archive_current_backup()
         archive_current_dropbox_backup()
         dir_name = create_new_directory()
         create_new_backup(dir_name)
         copy_backup_to_dropbox(dir_name)
-        print("completed {} backup to local directory {}".format(settings.DISKSTATION_HOST, dir_name))
+
+        end_date = datetime.now().strftime("%m/%d/%Y %H:%M:%S")
+        print("completed {} backup to local directory {} ({})".format(
+            settings.DISKSTATION_HOST,
+            dir_name,
+            end_date,
+        ))
         delete_local_archive()
         delete_dropbox_archive()
     except FileNotFoundError as error:

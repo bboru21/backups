@@ -103,13 +103,22 @@ def delete_local_archive():
 
 def run():
 
-    print("initializing {} backup to local...".format(settings.SANDBOX_HOST))
+    start_date = datetime.now().strftime("%m/%d/%Y %H:%M:%S")
+    print("initializing {} backup to local ({})".format(
+        settings.SANDBOX_HOST,
+        start_date,
+    ))
 
     try:
         archive_current_backup()
         dir_name = create_new_directory()
         create_new_backup(dir_name)
-        print("completed {} backup to local directory {}".format(settings.SANDBOX_HOST, dir_name))
+        end_date = datetime.now().strftime("%m/%d/%Y %H:%M:%S")
+        print("completed {} backup to local directory {} ({})".format(
+            settings.SANDBOX_HOST,
+            dir_name,
+            end_date,
+        ))
         delete_local_archive()
     except TypeError as error:
         print("TypeError: {}".format(error))

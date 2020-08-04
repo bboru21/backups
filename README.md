@@ -15,9 +15,6 @@ Run script with gitignored `local_settings.py` file to keep sensitive info out o
 
     (venv) backup_nas_files$ python backup_diskstation.py --settings=settings_local
 
-### Edit Crontab
-    env EDITOR=vim crontab -e
-
 ## Backup Sandbox Files
 
 ### Run Script
@@ -25,6 +22,9 @@ Run script with gitignored `local_settings.py` file to keep sensitive info out o
 Run script with gitignored `local_settings.py` file to keep sensitive info out of repo.
 
     (venv) backups$ python backup_sandbox.py --settings=settings_local
+
+## Edit Crontab
+    env EDITOR=vim crontab -e
 
 
 
