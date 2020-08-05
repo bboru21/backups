@@ -1,6 +1,6 @@
 #!/usr/local/bin/ python3
 
-import os, re, shutil, sys
+import logging, os, re, shutil, sys
 from datetime import datetime
 from simple_settings import settings
 import paramiko
@@ -8,13 +8,17 @@ from scp import (
     SCPClient,
     SCPException
 )
+logging.basicConfig(
+    filename='backup_diskstation.log',
+    level=logging.DEBUG,
+    datefmt="%m-%d-%Y %H:%M:%S",
+    format='%(asctime)s %(levelname)-8s %(message)s',
+)
 
 OS_BACKUPS_PATH = settings.BACKUPS_DIRECTORY.split("/")[1:]
 OS_BACKUPS_PATH[0] = "/{}".format(OS_BACKUPS_PATH[0])
 OS_DROPBOX_BACKUPS_PATH = settings.DROPBOX_BACKUPS_DIRECTORY.split("/")[1:]
 OS_DROPBOX_BACKUPS_PATH[0] = "/{}".format(OS_DROPBOX_BACKUPS_PATH[0])
-
-print(OS_BACKUPS_PATH, OS_DROPBOX_BACKUPS_PATH)
 
 # Define progress callback that prints the current percentage completed for the file
 def progress(filename, size, sent):
@@ -22,7 +26,7 @@ def progress(filename, size, sent):
 
 
 def archive_current_backup():
-    print("archiving current backup")
+    # print("archiving current backup")
     # create archive folders
     dir = os.path.join(*OS_BACKUPS_PATH, "archive-diskstation")
     if not os.path.exists(dir):
@@ -36,11 +40,11 @@ def archive_current_backup():
                 "{}/{}".format(settings.BACKUPS_DIRECTORY, d),
                 "{}/archive-diskstation/{}".format(settings.BACKUPS_DIRECTORY, d),
             )
-    print("done")
+    # print("done")
 
 
 def archive_current_dropbox_backup():
-    print("archiving current dropbox backup")
+    # print("archiving current dropbox backup")
 
     # create archive folders
     dir = os.path.join(*OS_DROPBOX_BACKUPS_PATH, "archive-diskstation")
@@ -56,10 +60,10 @@ def archive_current_dropbox_backup():
                 "{}/archive-diskstation/{}".format(settings.DROPBOX_BACKUPS_DIRECTORY, d),
             )
 
-    print("done")
+    # print("done")
 
 def create_new_directory():
-    print("creating new backup directory...")
+    # print("creating new backup directory...")
     name = "Backup_Diskstation_{}".format(
         datetime.now().strftime("%Y%m%d%H%M%S")
     )
@@ -68,12 +72,12 @@ def create_new_directory():
     if not os.path.exists(dir):
         os.mkdir(dir)
 
-    print("done")
+    # print("done")
 
     return name
 
 def create_new_backup(destination):
-    print("creating a new backup...")
+    # print("creating a new backup...")
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     ssh.load_system_host_keys()
@@ -93,7 +97,8 @@ def create_new_backup(destination):
             timeout=5000,
         )
 
-        with SCPClient(ssh.get_transport(), progress=progress) as scp:
+        # with SCPClient(ssh.get_transport(), progress=progress) as scp:
+        with SCPClient(ssh.get_transport()) as scp:
             # user home directory files (.ssh, .bashrc)
             scp.get(
                 "~/.bashrc",
@@ -118,33 +123,33 @@ def create_new_backup(destination):
                     "{}/bryanhadro_django_project/website/website/config/local.py".format(settings.DISKSTATION_WEB_DIRECTORY),
                     "{}/{}/bryanhadro_django_project_local.py".format(settings.BACKUPS_DIRECTORY, destination),
                 )
-    print("done")
+    # print("done")
 
 def copy_backup_to_dropbox(destination):
-    print("copying backup to dropbox...")
+    # print("copying backup to dropbox...")
     shutil.copytree(
         src="{}/{}".format(settings.BACKUPS_DIRECTORY, destination),
         dst="{}/{}".format(settings.DROPBOX_BACKUPS_DIRECTORY, destination),
     )
-    print("done")
+    # print("done")
 
 def delete_local_archive():
-    print("removing local archive...")
+    # print("removing local archive...")
     shutil.rmtree("{}/archive-diskstation".format(settings.BACKUPS_DIRECTORY))
-    print("done")
+    # print("done")
 
 def delete_dropbox_archive():
-    print("removing dropbox archive...")
+    # print("removing dropbox archive...")
     shutil.rmtree("{}/archive-diskstation".format(settings.DROPBOX_BACKUPS_DIRECTORY))
-    print("done")
+    # print("done")
 
 def run():
-
-    start_date = datetime.now().strftime("%m/%d/%Y %H:%M:%S")
-    print("initializing {} backup to local ({})".format(
-        settings.DISKSTATION_HOST,
-        start_date,
-    ))
+    errors = []
+    # start_date = datetime.now().strftime("%m/%d/%Y %H:%M:%S")
+    # print("initializing {} backup to local ({})".format(
+    #     settings.DISKSTATION_HOST,
+    #     start_date,
+    # ))
     try:
         archive_current_backup()
         archive_current_dropbox_backup()
@@ -152,27 +157,43 @@ def run():
         create_new_backup(dir_name)
         copy_backup_to_dropbox(dir_name)
 
-        end_date = datetime.now().strftime("%m/%d/%Y %H:%M:%S")
-        print("completed {} backup to local directory {} ({})".format(
-            settings.DISKSTATION_HOST,
-            dir_name,
-            end_date,
-        ))
+        # end_date = datetime.now().strftime("%m/%d/%Y %H:%M:%S")
+        # print("completed {} backup to local directory {} ({})".format(
+        #     settings.DISKSTATION_HOST,
+        #     dir_name,
+        #     end_date,
+        # ))
         delete_local_archive()
         delete_dropbox_archive()
     except FileNotFoundError as error:
-        print("FileNotFoundError: {}".format(error))
+        errors.append("FileNotFoundError: {}".format(error))
     except TypeError as error:
-        print("TypeError: {}".format(error))
+        errors.append("TypeError: {}".format(error))
     except FileExistsError as error:
-        print("FileExistsError: {}".format(error))
+        errors.append("FileExistsError: {}".format(error))
     except NameError as error:
-        print("NameError: {}".format(error))
+        errors.append("NameError: {}".format(error))
     except SCPException as error:
-        print("SCPException: {}".format(error))
+        errors.append("SCPException: {}".format(error))
     except:
-        print("Unexpected error:", sys.exc_info()[0])
+        errors.append("Unexpected error:", sys.exc_info()[0])
 
-    print("finis")
+    # success/error logging
+    if len(errors) == 0:
+        success_message = "{} backed up to local directory {}".format(
+            settings.DISKSTATION_HOST,
+            dir_name,
+        )
+        # print(success_message)
+        logging.info(success_message)
+    else:
+        error_message = "{} backup encountered the following errors: {}".format(
+            settings.DISKSTATION_HOST,
+            ", ".join(errors),
+        )
+        # print(error_message)
+        logging.error(error_message)
+
+    # print("finis")
 
 run()

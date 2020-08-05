@@ -1,12 +1,19 @@
 #!/usr/local/bin/ python3
 
-import os, re, shutil, sys
+import logging, os, re, shutil, sys
 from datetime import datetime
 from simple_settings import settings
 import paramiko
 from scp import (
     SCPClient,
     SCPException
+)
+
+logging.basicConfig(
+    filename='backup_sandbox.log',
+    level=logging.DEBUG,
+    datefmt="%m-%d-%Y %H:%M:%S",
+    format='%(asctime)s %(levelname)-8s %(message)s',
 )
 
 OS_BACKUPS_PATH = settings.BACKUPS_DIRECTORY.split("/")[1:]
@@ -17,7 +24,7 @@ def progress(filename, size, sent):
     sys.stdout.write("%s\'s progress: %.2f%%   \r" % (filename, float(sent)/float(size)*100) )
 
 def archive_current_backup():
-    print("archiving current backup")
+    # print("archiving current backup")
     # create archive folders
     dir = os.path.join(*OS_BACKUPS_PATH, "archive-sandbox")
     if not os.path.exists(dir):
@@ -31,10 +38,10 @@ def archive_current_backup():
                 "{}/{}".format(settings.BACKUPS_DIRECTORY, d),
                 "{}/archive-sandbox/{}".format(settings.BACKUPS_DIRECTORY, d),
             )
-    print("done")
+    # print("done")
 
 def create_new_directory():
-    print("creating new backup directory...")
+    # print("creating new backup directory...")
     name = "Backup_Sandbox_{}".format(
         datetime.now().strftime("%Y%m%d%H%M%S")
     )
@@ -43,12 +50,12 @@ def create_new_directory():
     if not os.path.exists(dir):
         os.mkdir(dir)
 
-    print("done")
+    # print("done")
     return name
 
 def create_new_backup(destination):
 
-    print("creating a new backup...")
+    # print("creating a new backup...")
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     ssh.load_system_host_keys()
@@ -68,7 +75,8 @@ def create_new_backup(destination):
             timeout=5000,
         )
 
-        with SCPClient(ssh.get_transport(), progress=progress) as scp:
+        # with SCPClient(ssh.get_transport(), progress=progress) as scp: # removed to keep log clean
+        with SCPClient(ssh.get_transport()) as scp:
 
             scp.get(
                 "~/.bashrc",
@@ -94,38 +102,50 @@ def create_new_backup(destination):
             #     recursive=True,
             # )
 
-    print("done")
+    # print("done")
 
 def delete_local_archive():
-    print("removing local archive...")
+    # print("removing local archive...")
     shutil.rmtree("{}/archive-sandbox".format(settings.BACKUPS_DIRECTORY))
-    print("done")
+    # print("done")
 
 def run():
-
-    start_date = datetime.now().strftime("%m/%d/%Y %H:%M:%S")
-    print("initializing {} backup to local ({})".format(
-        settings.SANDBOX_HOST,
-        start_date,
-    ))
+    errors = []
+    # start_date = datetime.now().strftime("%m/%d/%Y %H:%M:%S")
+    # print("initializing {} backup to local ({})".format(
+    #     settings.SANDBOX_HOST,
+    #     start_date,
+    # ))
 
     try:
         archive_current_backup()
         dir_name = create_new_directory()
         create_new_backup(dir_name)
-        end_date = datetime.now().strftime("%m/%d/%Y %H:%M:%S")
-        print("completed {} backup to local directory {} ({})".format(
-            settings.SANDBOX_HOST,
-            dir_name,
-            end_date,
-        ))
         delete_local_archive()
     except TypeError as error:
-        print("TypeError: {}".format(error))
+        message = "TypeError: {}".format(error)
+        errors.append(message)
     except:
-        print("Unexpected error:", sys.exc_info()[0])
+        message = "Unexpected error:", sys.exc_info()[0]
+        errors.append(message)
 
-    print("finis")
+    # success/error logging
+    if len(errors) == 0:
+        success_message = "{} backed up to local directory {}".format(
+            settings.SANDBOX_HOST,
+            dir_name,
+        )
+        print(success_message)
+        logging.info(success_message)
+    else:
+        error_message = "{} backup encountered the following errors: {}".format(
+            settings.SANDBOX_HOST,
+            ", ".join(errors),
+        )
+        print(error_message)
+        logging.error(error_message)
+
+    # print("finis")
 
 run()
 
