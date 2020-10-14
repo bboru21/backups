@@ -8,6 +8,7 @@ from scp import (
     SCPClient,
     SCPException
 )
+import subprocess
 
 logging.basicConfig(
     filename='backup_sandbox.log',
@@ -19,12 +20,25 @@ logging.basicConfig(
 OS_BACKUPS_PATH = settings.BACKUPS_DIRECTORY.split("/")[1:]
 OS_BACKUPS_PATH[0] = "/{}".format(OS_BACKUPS_PATH[0])
 
+RSYNC_ARGS = (
+    "rsync",
+    "-av",
+    "-e", "ssh",
+)
+RSYNC_EXCLUDE_ARGS = (
+    "--exclude", "*.pyc",
+    "--exclude", "venv",
+    "--exclude", "virtualenv",
+    "--exclude", "venv_py2",
+    "--exclude", ".git",
+)
+
 # Define progress callback that prints the current percentage completed for the file
 def progress(filename, size, sent):
     sys.stdout.write("%s\'s progress: %.2f%%   \r" % (filename, float(sent)/float(size)*100) )
 
 def archive_current_backup():
-    # print("archiving current backup")
+    print("archiving current backup")
     # create archive folders
     dir = os.path.join(*OS_BACKUPS_PATH, "archive-sandbox")
     if not os.path.exists(dir):
@@ -38,10 +52,10 @@ def archive_current_backup():
                 "{}/{}".format(settings.BACKUPS_DIRECTORY, d),
                 "{}/archive-sandbox/{}".format(settings.BACKUPS_DIRECTORY, d),
             )
-    # print("done")
+    print("done")
 
 def create_new_directory():
-    # print("creating new backup directory...")
+    print("creating new backup directory...")
     name = "Backup_Sandbox_{}".format(
         datetime.now().strftime("%Y%m%d%H%M%S")
     )
@@ -50,7 +64,7 @@ def create_new_directory():
     if not os.path.exists(dir):
         os.mkdir(dir)
 
-    # print("done")
+    print("done")
     return name
 
 def create_new_backup(destination):
@@ -96,18 +110,77 @@ def create_new_backup(destination):
                 recursive=True,
             )
 
-            # scp.get(
-            #     "~/scripts",
-            #     "{}/{}/{}/scripts".format(settings.BACKUPS_DIRECTORY, destination, user),
-            #     recursive=True,
-            # )
+            '''
+                formerly:
+                rsync -av -e ssh --exclude='*.pyc' --exclude='venv' --exclude='virtualenv' hadrob@$HOST:~/scripts ~/Downloads/$DIRECTORY_NAME
+            '''
+            completed_process = subprocess.run([
+                *RSYNC_ARGS,
+                *RSYNC_EXCLUDE_ARGS,
+                "{}@{}:~/scripts".format(user, settings.SANDBOX_HOST),
+                "{}/{}/{}/scripts".format(settings.BACKUPS_DIRECTORY, destination, user),
+            ])
 
-    # print("done")
+            print("~/scripts rysync completed with code {}".format(completed_process.returncode))
+
+            '''
+                formerly:
+                rsync -av -e ssh --exclude='*.pyc' --exclude='venv' --exclude='virtualenv' hadrob@$HOST:~/smoketest ~/Downloads/$DIRECTORY_NAME
+            '''
+
+            completed_process = subprocess.run([
+                *RSYNC_ARGS,
+                *RSYNC_EXCLUDE_ARGS,
+                "{}@{}:~/smoketest".format(user, settings.SANDBOX_HOST),
+                "{}/{}/{}/smoketest".format(settings.BACKUPS_DIRECTORY, destination, user),
+            ])
+
+            print("~/smoketest rysync completed with code {}".format(completed_process.returncode))
+
+
+            completed_process = subprocess.run([
+                *RSYNC_ARGS,
+                *RSYNC_EXCLUDE_ARGS,
+                "--include", "*local*.py",
+                "--include", "*/",
+                "--exclude", "*",
+                "{}@{}:~/travel-scripts".format(user, settings.SANDBOX_HOST),
+                "{}/{}/{}".format(settings.BACKUPS_DIRECTORY, destination, user),
+            ])
+
+            print("~/travel-scripts rysync completed with code {}".format(completed_process.returncode))
+
+            '''
+
+            echo "backing up $HOST_NAME travel-scripts repo local settings..."
+            mkdir ~/Downloads/$DIRECTORY_NAME/travel-scripts
+            mkdir ~/Downloads/$DIRECTORY_NAME/travel-scripts/travel
+            mkdir ~/Downloads/$DIRECTORY_NAME/travel-scripts/travel/viator
+            mkdir ~/Downloads/$DIRECTORY_NAME/travel-scripts/travel/viator/settings
+            scp hadrob@$HOST:~/travel-scripts/travel/viator/settings/local.py ~/Downloads/$DIRECTORY_NAME/travel-scripts/travel/viator/settings
+
+            echo "backing up $HOST_NAME Travel repo local settings..."
+            mkdir ~/Downloads/$DIRECTORY_NAME/travel
+            mkdir ~/Downloads/$DIRECTORY_NAME/travel/config
+            scp hadrob@$HOST:/var/www/travel/config/local.py ~/Downloads/$DIRECTORY_NAME/travel/config
+
+            echo "backing up $HOST_NAME Travel DMS repo local settings..."
+            mkdir ~/Downloads/$DIRECTORY_NAME/travel-dms
+            mkdir ~/Downloads/$DIRECTORY_NAME/travel-dms/dms
+            mkdir ~/Downloads/$DIRECTORY_NAME/travel-dms/dms/settings
+            scp hadrob@$HOST:/var/www/travel-dms/dms/settings/local_settings.py ~/Downloads/$DIRECTORY_NAME/travel-dms/dms/settings
+            scp hadrob@$HOST:/var/www/travel-dms/dms/settings/local_settings_stag.py ~/Downloads/$DIRECTORY_NAME/travel-dms/dms/settings
+
+            echo "$HOST files backed up to ~/Downloads/$DIRECTORY_NAME"
+
+            '''
+
+    print("done")
 
 def delete_local_archive():
-    # print("removing local archive...")
+    print("removing local archive...")
     shutil.rmtree("{}/archive-sandbox".format(settings.BACKUPS_DIRECTORY))
-    # print("done")
+    print("done")
 
 def run():
     errors = []
@@ -117,17 +190,17 @@ def run():
     #     start_date,
     # ))
 
-    try:
-        archive_current_backup()
-        dir_name = create_new_directory()
-        create_new_backup(dir_name)
-        delete_local_archive()
-    except TypeError as error:
-        message = "TypeError: {}".format(error)
-        errors.append(message)
-    except:
-        message = "Unexpected error:", sys.exc_info()[0]
-        errors.append(message)
+    # try:
+    archive_current_backup()
+    dir_name = create_new_directory()
+    create_new_backup(dir_name)
+    delete_local_archive()
+    # except TypeError as error:
+    #     message = "TypeError: {}".format(error)
+    #     errors.append(message)
+    # except:
+    #     message = "Unexpected error: {}".format(sys.exc_info()[0])
+    #     errors.append(message)
 
     # success/error logging
     if len(errors) == 0:
@@ -145,41 +218,6 @@ def run():
         print(error_message)
         logging.error(error_message)
 
-    # print("finis")
+    print("finis")
 
 run()
-
-'''
-
-
-
-
-
-echo "backing up $HOST_NAME scripts directory..."
-rsync -av -e ssh --exclude='*.pyc' --exclude='venv' --exclude='virtualenv' hadrob@$HOST:~/scripts ~/Downloads/$DIRECTORY_NAME
-
-echo "backing up $HOST_NAME smoketest repo..."
-rsync -av -e ssh --exclude='*.pyc' --exclude='venv' --exclude='virtualenv' hadrob@$HOST:~/smoketest ~/Downloads/$DIRECTORY_NAME
-
-echo "backing up $HOST_NAME travel-scripts repo local settings..."
-mkdir ~/Downloads/$DIRECTORY_NAME/travel-scripts
-mkdir ~/Downloads/$DIRECTORY_NAME/travel-scripts/travel
-mkdir ~/Downloads/$DIRECTORY_NAME/travel-scripts/travel/viator
-mkdir ~/Downloads/$DIRECTORY_NAME/travel-scripts/travel/viator/settings
-scp hadrob@$HOST:~/travel-scripts/travel/viator/settings/local.py ~/Downloads/$DIRECTORY_NAME/travel-scripts/travel/viator/settings
-
-echo "backing up $HOST_NAME Travel repo local settings..."
-mkdir ~/Downloads/$DIRECTORY_NAME/travel
-mkdir ~/Downloads/$DIRECTORY_NAME/travel/config
-scp hadrob@$HOST:/var/www/travel/config/local.py ~/Downloads/$DIRECTORY_NAME/travel/config
-
-echo "backing up $HOST_NAME Travel DMS repo local settings..."
-mkdir ~/Downloads/$DIRECTORY_NAME/travel-dms
-mkdir ~/Downloads/$DIRECTORY_NAME/travel-dms/dms
-mkdir ~/Downloads/$DIRECTORY_NAME/travel-dms/dms/settings
-scp hadrob@$HOST:/var/www/travel-dms/dms/settings/local_settings.py ~/Downloads/$DIRECTORY_NAME/travel-dms/dms/settings
-scp hadrob@$HOST:/var/www/travel-dms/dms/settings/local_settings_stag.py ~/Downloads/$DIRECTORY_NAME/travel-dms/dms/settings
-
-echo "$HOST files backed up to ~/Downloads/$DIRECTORY_NAME"
-
-'''
