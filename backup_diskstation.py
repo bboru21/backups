@@ -114,7 +114,7 @@ def create_new_backup(destination):
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     ssh.load_system_host_keys()
 
-    for user in ['webmaster']:
+    for user in settings.DISKSTATION_USERS:
 
         dir = os.path.join(*OS_BACKUPS_PATH, destination, user)
         if not os.path.exists(dir):
