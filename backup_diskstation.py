@@ -105,6 +105,10 @@ def create_new_backup(destination):
                 "{}/{}/{}/dotbashrc".format(settings.BACKUPS_DIRECTORY, destination, user),
             )
             scp.get(
+                "~/.bash_profile",
+                "{}/{}/{}/dotbash_profile".format(settings.BACKUPS_DIRECTORY, destination, user),
+            )
+            scp.get(
                 "~/.ssh",
                 "{}/{}/{}/dotssh".format(settings.BACKUPS_DIRECTORY, destination, user),
                 recursive=True,
