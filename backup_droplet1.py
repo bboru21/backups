@@ -125,6 +125,10 @@ def create_new_backup(destination):
                     "{}/{}/bryanhadro_prod.py".format(settings.BACKUPS_DIRECTORY, destination),
                 )
                 scp.get(
+                    "{}/bryanhadro/website/db.sqlite3".format(settings.DROPLET1_WEB_DIRECTORY),
+                    "{}/{}/bryanhadro_db.sqlite3".format(settings.BACKUPS_DIRECTORY, destination),
+                )
+                scp.get(
                     "{}/bevendo_project/bevendo/bevendo/settings/local.py".format(settings.DROPLET1_WEB_DIRECTORY),
                     "{}/{}/bevendo_local.py".format(settings.BACKUPS_DIRECTORY, destination),
                 )
@@ -132,8 +136,28 @@ def create_new_backup(destination):
                     "{}/bevendo_project/bevendo/bevendo/settings/production.py".format(settings.DROPLET1_WEB_DIRECTORY),
                     "{}/{}/bevendo_production.py".format(settings.BACKUPS_DIRECTORY, destination),
                 )
+                scp.get(
+                    "{}/bevendo_project/bevendo/bevendo/db.sqlite3".format(settings.DROPLET1_WEB_DIRECTORY),
+                    "{}/{}/bevendo_db.sqlite3".format(settings.BACKUPS_DIRECTORY, destination),
+                )
+                scp.get(
+                    "{}/avvento_project/avvento/avvento/settings/local.py".format(settings.DROPLET1_WEB_DIRECTORY),
+                    "{}/{}/avvento_local.py".format(settings.BACKUPS_DIRECTORY, destination),
+                )
+                scp.get(
+                    "{}/avvento_project/avvento/avvento/settings/production.py".format(settings.DROPLET1_WEB_DIRECTORY),
+                    "{}/{}/avvento_production.py".format(settings.BACKUPS_DIRECTORY, destination),
+                )
+                scp.get(
+                    "{}/avvento_project/avvento/avvento/db.sqlite3".format(settings.DROPLET1_WEB_DIRECTORY),
+                    "{}/{}/avvento_db.sqlite3".format(settings.BACKUPS_DIRECTORY, destination),
+                )
 
                 # Apache config files
+                scp.get(
+                    f'/etc/apache2/ports.conf',
+                    f'{settings.BACKUPS_DIRECTORY}/{destination}/ports.conf',
+                )
                 scp.get(
                     f'/etc/apache2/sites-available/000-default.conf',
                     f'{settings.BACKUPS_DIRECTORY}/{destination}/000-default.conf',
@@ -154,12 +178,12 @@ def copy_backup_to_dropbox(destination):
 
 def delete_local_archive():
     # print("removing local archive...")
-    shutil.rmtree("{}/archive-diskstation".format(settings.BACKUPS_DIRECTORY))
+    shutil.rmtree("{}/archive-droplet1".format(settings.BACKUPS_DIRECTORY))
     # print("done")
 
 def delete_dropbox_archive():
     # print("removing dropbox archive...")
-    shutil.rmtree("{}/archive-diskstation".format(settings.DROPBOX_BACKUPS_DIRECTORY))
+    shutil.rmtree("{}/archive-droplet1".format(settings.DROPBOX_BACKUPS_DIRECTORY))
     # print("done")
 
 def run():

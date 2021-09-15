@@ -180,7 +180,7 @@ def run():
     except SCPException as error:
         errors.append("SCPException: {}".format(error))
     except:
-        errors.append("Unexpected error:", sys.exc_info()[0])
+        errors.append("Unexpected error: {}".format(sys.exc_info()[0]))
 
     # success/error logging
     if len(errors) == 0:
