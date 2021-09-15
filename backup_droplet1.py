@@ -166,6 +166,10 @@ def create_new_backup(destination):
                     f'/etc/apache2/sites-available/001-default.conf',
                     f'{settings.BACKUPS_DIRECTORY}/{destination}/001-default.conf',
                 )
+                scp.get(
+                    f'/etc/apache2/sites-available/002-default.conf',
+                    f'{settings.BACKUPS_DIRECTORY}/{destination}/002-default.conf',
+                )
     # print("done")
 
 def copy_backup_to_dropbox(destination):
