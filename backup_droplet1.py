@@ -1,5 +1,6 @@
 #!/usr/local/bin/ python3
 
+from pathlib import Path
 import logging, os, re, shutil, sys
 from datetime import datetime
 from simple_settings import settings
@@ -33,13 +34,12 @@ def archive_current_backup():
         os.mkdir(dir)
 
     # move old backup folders into archive
-    dirs = next( os.walk(settings.BACKUPS_DIRECTORY))[1]
-    for d in dirs:
-        if re.match('Backup_Droplet1', d, flags=re.IGNORECASE):
-            shutil.move(
-                "{}/{}".format(settings.BACKUPS_DIRECTORY, d),
-                "{}/archive-droplet1/{}".format(settings.BACKUPS_DIRECTORY, d),
-            )
+    for path in Path(settings.BACKUPS_DIRECTORY).glob('Backup_Droplet1*'):
+        directory_name = path.name
+        shutil.move(
+            f"{settings.BACKUPS_DIRECTORY}/{directory_name}",
+            f"{settings.BACKUPS_DIRECTORY}/archive-droplet1/{directory_name}",
+        )
     logging.debug('archived current backup')
 
 
@@ -52,13 +52,12 @@ def archive_current_dropbox_backup():
         os.mkdir(dir)
 
     # move old backup folders into Dropbox archive
-    dirs = next( os.walk(settings.DROPBOX_BACKUPS_DIRECTORY))[1]
-    for d in dirs:
-        if re.match('Backup_Droplet1', d, flags=re.IGNORECASE):
-            shutil.move(
-                "{}/{}".format(settings.DROPBOX_BACKUPS_DIRECTORY, d),
-                "{}/archive-droplet1/{}".format(settings.DROPBOX_BACKUPS_DIRECTORY, d),
-            )
+    for path in Path(settings.DROPBOX_BACKUPS_DIRECTORY).glob('Backup_Droplet1*'):
+        directory_name = path.name
+        shutil.move(
+            f'{settings.DROPBOX_BACKUPS_DIRECTORY}/{directory_name}',
+            f'{settings.DROPBOX_BACKUPS_DIRECTORY}/archive-droplet1/{directory_name}',
+        )
 
     logging.debug("archived current dropbox backup")
 
