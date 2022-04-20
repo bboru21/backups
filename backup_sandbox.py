@@ -86,12 +86,17 @@ def create_new_backup(destination):
             *RSYNC_ARGS,
             *RSYNC_EXCLUDE_ARGS,
             "--exclude", ".cache",
+            "--exclude", ".nvm",
+            "--exclude", ".gradle",
             "--exclude", "Python-3.7.3",        # remove after 3.7 upgrade
             "--exclude", "Python-3.7.3.tar.xz", # remove after 3.7 upgrade
             "--exclude", "overwatch",
             "--exclude", "smoketest",           # .git repo
             "--exclude", "travel-scripts",      # .git repo
             "--exclude", "web-tests-accessory", # .git repo
+            "--exclude", "DevOps",
+            "--exclude", "firefly2",
+            "--exclude", "puppet",
             "{}@{}:{}".format(user, settings.SANDBOX_HOST, remote_directory),
             "{}/{}/{}".format(settings.BACKUPS_DIRECTORY, destination, user),
         ])
