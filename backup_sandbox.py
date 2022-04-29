@@ -88,6 +88,11 @@ def create_new_backup(destination):
             "--exclude", ".cache",
             "--exclude", ".nvm",
             "--exclude", ".gradle",
+            "--exclude", ".bundle",
+            "--exclude", ".mysql_history",
+            "--exclude", ".node-gyp",
+            "--exclude", ".npm",
+            "--exclude", ".pm2",
             "--exclude", "Python-3.7.3",        # remove after 3.7 upgrade
             "--exclude", "Python-3.7.3.tar.xz", # remove after 3.7 upgrade
             "--exclude", "overwatch",
