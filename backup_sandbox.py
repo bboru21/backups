@@ -1,16 +1,12 @@
 #!/usr/local/bin/ python3
 
-import logging, os, re, shutil, sys
+import os, re, shutil, sys
 from datetime import datetime
 from simple_settings import settings
 import subprocess
+from common import get_logger
 
-logging.basicConfig(
-    filename='backup_sandbox.log',
-    level=logging.DEBUG,
-    datefmt="%m-%d-%Y %H:%M:%S",
-    format='%(asctime)s %(levelname)-8s %(message)s',
-)
+logger = get_logger('backup_sandbox.log')
 
 OS_BACKUPS_PATH = settings.BACKUPS_DIRECTORY.split("/")[1:]
 OS_BACKUPS_PATH[0] = "/{}".format(OS_BACKUPS_PATH[0])
@@ -233,14 +229,14 @@ def run():
             dir_name,
         )
         print(success_message)
-        logging.info(success_message)
+        logger.info(success_message)
     else:
         error_message = "{} backup encountered the following errors: {}".format(
             settings.SANDBOX_HOST,
             ", ".join(ERRORS),
         )
         print(error_message)
-        logging.error(error_message)
+        logger.error(error_message)
 
     print("finis")
 

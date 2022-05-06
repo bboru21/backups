@@ -1,7 +1,7 @@
 #!/usr/local/bin/ python3
 
 from pathlib import Path
-import logging, os, re, shutil, sys
+import os, re, shutil, sys
 from datetime import datetime
 from simple_settings import settings
 import paramiko
@@ -9,12 +9,10 @@ from scp import (
     SCPClient,
     SCPException
 )
-logging.basicConfig(
-    filename='backup_droplet1.log',
-    level=logging.DEBUG,
-    datefmt="%m-%d-%Y %H:%M:%S",
-    format='%(asctime)s %(levelname)-8s %(message)s',
-)
+from common import get_logger
+
+logger = get_logger('backup_droplet1.log')
+
 
 OS_BACKUPS_PATH = settings.BACKUPS_DIRECTORY.split("/")[1:]
 OS_BACKUPS_PATH[0] = "/{}".format(OS_BACKUPS_PATH[0])
@@ -35,16 +33,18 @@ def archive_current_backup():
 
     # move old backup folders into archive
     for path in Path(settings.BACKUPS_DIRECTORY).glob('Backup_Droplet1*'):
+        logger.debug(f'beginning archive of path {path}, exists values is {path.exists()}')
         directory_name = path.name
         shutil.move(
             f"{settings.BACKUPS_DIRECTORY}/{directory_name}",
             f"{settings.BACKUPS_DIRECTORY}/archive-droplet1/{directory_name}",
         )
-    logging.debug('archived current backup')
+        logger.debug(f'archive of path {path} complete, exists values is {path.exists()}')
+    logger.debug('archived current backup')
 
 
 def archive_current_dropbox_backup():
-    logging.debug("archiving current dropbox backup")
+    logger.debug("archiving current dropbox backup")
 
     # create archive folders
     dir = os.path.join(*OS_DROPBOX_BACKUPS_PATH, "archive-droplet1")
@@ -53,16 +53,18 @@ def archive_current_dropbox_backup():
 
     # move old backup folders into Dropbox archive
     for path in Path(settings.DROPBOX_BACKUPS_DIRECTORY).glob('Backup_Droplet1*'):
+        logger.debug(f'beginning archive of dropbox path {path}, exists values is {path.exists()}')
         directory_name = path.name
         shutil.move(
             f'{settings.DROPBOX_BACKUPS_DIRECTORY}/{directory_name}',
             f'{settings.DROPBOX_BACKUPS_DIRECTORY}/archive-droplet1/{directory_name}',
         )
+        logger.debug(f'archive of dropbox path {path} complete, exists values is {path.exists()}')
 
-    logging.debug("archived current dropbox backup")
+    logger.debug("archived current dropbox backup")
 
 def create_new_directory():
-    logging.debug("creating new backup directory...")
+    logger.debug("creating new backup directory...")
     name = "Backup_Droplet1_{}".format(
         datetime.now().strftime("%Y%m%d%H%M%S")
     )
@@ -71,7 +73,7 @@ def create_new_directory():
     if not os.path.exists(dir):
         os.mkdir(dir)
 
-    logging.debug("created new backup directory")
+    logger.debug("created new backup directory")
 
     return name
 
@@ -221,14 +223,14 @@ def run():
             dir_name,
         )
         # print(success_message)
-        logging.info(success_message)
+        logger.info(success_message)
     else:
         error_message = "{} backup encountered the following errors: {}".format(
             settings.DROPLET1_HOST,
             ", ".join(errors),
         )
         # print(error_message)
-        logging.error(error_message)
+        logger.error(error_message)
 
     # print("finis")
 
