@@ -195,6 +195,24 @@ def create_new_backup(destination):
             ERRORS.append( message )
         print(message)
 
+        # Apache config files
+        completed_process = subprocess.run([
+            *RSYNC_ARGS,
+            *RSYNC_EXCLUDE_ARGS,
+            "--include", "poseidon-django.wsgi",
+            "--include", "poseidon-django-admin.wsgi",
+            "--include", "travel-inject.wsgi",
+            "--include", "travel-dms.wsgi",
+            "--include", "poseidon-django.conf",
+            "--include", "poseidon-django-admin.conf",
+            "--include", "travel-inject.conf",
+            "--include", "travel-dms.conf",
+            "--include", "*/",
+            "--exclude", "*",
+            "{}@{}:/etc/apache2".format(user, settings.SANDBOX_HOST),
+            "{}/{}/{}".format(settings.BACKUPS_DIRECTORY, destination, user),
+        ])
+
     print("done")
 
 def delete_local_archive():
