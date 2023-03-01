@@ -138,9 +138,13 @@ def create_new_backup(destination):
                     "{}/{}/bevendo_production.py".format(settings.BACKUPS_DIRECTORY, destination),
                 )
                 # bevendo uses mysql, so get daily dump instead of db.sqlite3
+                # scp.get(
+                #     "{}/backups/bevendo-dump.sql.gz".format(settings.DROPLET1_WEB_DIRECTORY),
+                #     "{}/{}/bevendo-dump.sql.gz".format(settings.BACKUPS_DIRECTORY, destination),
+                # )
                 scp.get(
-                    "{}/backups/bevendo-dump.sql.gz".format(settings.DROPLET1_WEB_DIRECTORY),
-                    "{}/{}/bevendo-dump.sql.gz".format(settings.BACKUPS_DIRECTORY, destination),
+                    "{}/backups/bevendo_v2-dump.sql.gz".format(settings.DROPLET1_WEB_DIRECTORY),
+                    "{}/{}/bevendo_v2-dump.sql.gz".format(settings.BACKUPS_DIRECTORY, destination),
                 )
                 scp.get(
                     "{}/avvento_project/avvento/avvento/settings/local.py".format(settings.DROPLET1_WEB_DIRECTORY),
