@@ -129,22 +129,19 @@ def create_new_backup(destination):
                     "{}/bryanhadro/website/db.sqlite3".format(settings.DROPLET1_WEB_DIRECTORY),
                     "{}/{}/bryanhadro_db.sqlite3".format(settings.BACKUPS_DIRECTORY, destination),
                 )
+                # bevendo
                 scp.get(
-                    "{}/bevendo_project/bevendo/bevendo/settings/local.py".format(settings.DROPLET1_WEB_DIRECTORY),
+                    "{}/bevendo_project/backend/bevendo/config/local.py".format(settings.DROPLET1_WEB_DIRECTORY),
                     "{}/{}/bevendo_local.py".format(settings.BACKUPS_DIRECTORY, destination),
                 )
                 scp.get(
-                    "{}/bevendo_project/bevendo/bevendo/settings/production.py".format(settings.DROPLET1_WEB_DIRECTORY),
-                    "{}/{}/bevendo_production.py".format(settings.BACKUPS_DIRECTORY, destination),
+                    "{}/bevendo_project/backend/bevendo/config/prod.py".format(settings.DROPLET1_WEB_DIRECTORY),
+                    "{}/{}/bevendo_prod.py".format(settings.BACKUPS_DIRECTORY, destination),
                 )
-                # bevendo uses mysql, so get daily dump instead of db.sqlite3
-                # scp.get(
-                #     "{}/backups/bevendo-dump.sql.gz".format(settings.DROPLET1_WEB_DIRECTORY),
-                #     "{}/{}/bevendo-dump.sql.gz".format(settings.BACKUPS_DIRECTORY, destination),
-                # )
+                # bevendo mysql dump
                 scp.get(
-                    "{}/backups/bevendo_v2-dump.sql.gz".format(settings.DROPLET1_WEB_DIRECTORY),
-                    "{}/{}/bevendo_v2-dump.sql.gz".format(settings.BACKUPS_DIRECTORY, destination),
+                    "{}/backups/bevendo-dump.sql.gz".format(settings.DROPLET1_WEB_DIRECTORY),
+                    "{}/{}/bevendo-dump.sql.gz".format(settings.BACKUPS_DIRECTORY, destination),
                 )
                 scp.get(
                     "{}/avvento_project/avvento/avvento/settings/local.py".format(settings.DROPLET1_WEB_DIRECTORY),
