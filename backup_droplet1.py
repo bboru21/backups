@@ -131,6 +131,10 @@ def create_new_backup(destination):
                 )
                 # bevendo
                 scp.get(
+                    "{}/bevendo_project/frontend/.env.local".format(settings.DROPLET1_WEB_DIRECTORY),
+                    "{}/{}/.env.local".format(settings.BACKUPS_DIRECTORY, destination),
+                )
+                scp.get(
                     "{}/bevendo_project/backend/bevendo/config/local.py".format(settings.DROPLET1_WEB_DIRECTORY),
                     "{}/{}/bevendo_local.py".format(settings.BACKUPS_DIRECTORY, destination),
                 )
