@@ -177,6 +177,14 @@ def create_new_backup(destination):
                     f'/etc/apache2/sites-available/002-default.conf',
                     f'{settings.BACKUPS_DIRECTORY}/{destination}/002-default.conf',
                 )
+                scp.get(
+                    f'/etc/apache2/sites-available/bevendo-backend.conf',
+                    f'{settings.BACKUPS_DIRECTORY}/{destination}/bevendo-backend.conf',
+                )
+                scp.get(
+                    f'/etc/apache2/sites-available/bevendo-frontend.conf',
+                    f'{settings.BACKUPS_DIRECTORY}/{destination}/bevendo-frontend.conf',
+                )
     # print("done")
 
 def copy_backup_to_dropbox(destination):
