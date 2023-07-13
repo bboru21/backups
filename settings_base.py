@@ -13,3 +13,20 @@ SANDBOX_PORT = 22
 BACKUPS_DIRECTORY = ""
 DROPBOX_BACKUPS_DIRECTORY = ""
 SSH_KEY = ""
+
+# codespaces
+CODESPACE_COPTHIS = {
+    "NAME": "",
+    "PATH": "",
+    "FILENAMES": (),
+}
+CODESPACE_COPTHIS_WEBSITE = {
+    "NAME": "",
+    "PATH": "",
+    "FILENAMES": (),
+}
+CODESPACE_MERCHBAR_WEB = {
+    "NAME": "",
+    "PATH": "",
+    "FILENAMES": (),
+}
