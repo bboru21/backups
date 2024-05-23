@@ -185,6 +185,10 @@ def create_new_backup(destination):
                     f'/etc/apache2/sites-available/bevendo-frontend.conf',
                     f'{settings.BACKUPS_DIRECTORY}/{destination}/bevendo-frontend.conf',
                 )
+                scp.get(
+                    f'/etc/apache2/sites-available/three-strikes-website.conf',
+                    f'{settings.BACKUPS_DIRECTORY}/{destination}/three-strikes-website.conf',
+                )
     # print("done")
 
 def copy_backup_to_dropbox(destination):
