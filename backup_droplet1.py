@@ -189,6 +189,10 @@ def create_new_backup(destination):
                     f'/etc/apache2/sites-available/three-strikes-website.conf',
                     f'{settings.BACKUPS_DIRECTORY}/{destination}/three-strikes-website.conf',
                 )
+                scp.get(
+                    f'/etc/apache2/sites-available/whisky-creek-ramblers.conf',
+                    f'{settings.BACKUPS_DIRECTORY}/{destination}/whisky-creek-ramblers.conf',
+                )
     # print("done")
 
 def copy_backup_to_dropbox(destination):
