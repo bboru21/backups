@@ -23,8 +23,10 @@ Run script with gitignored `local_settings.py` file to keep sensitive info out o
 
     (venv) backups$ python backup_sandbox.py --settings=settings_local
 
+## Ensure Shell Script is Executable
+
+    backups$ chmod +x run_local_backup.sh
+
+
 ## Edit Crontab
     env EDITOR=vim crontab -e
-
-
-
